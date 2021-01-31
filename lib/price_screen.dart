@@ -10,7 +10,8 @@ class PriceScreen extends StatefulWidget {
 }
 
 class _PriceScreenState extends State<PriceScreen> {
-  String USD = '?';
+  String selectedCurrency = 'USD';
+  String bitcoinValue = '?';
 
   @override
   void initState() {
@@ -20,8 +21,7 @@ class _PriceScreenState extends State<PriceScreen> {
 
   Future<void> getCoinData() async {
     CoinData coinData = CoinData();
-    var data = await coinData.getCoinData();
-    print(data);
+    var data = await coinData.getCoinData(from: 'BTC', to: selectedCurrency);
     if (data == null) {
       updateUI('Error getting');
     } else {
@@ -32,11 +32,9 @@ class _PriceScreenState extends State<PriceScreen> {
 
   void updateUI(String exchangeRate) {
     setState(() {
-      USD = exchangeRate;
+      bitcoinValue = exchangeRate;
     });
   }
-
-  String selectedCurrency = 'USD';
 
   Widget getPlatformPicker() {
     return Platform.isIOS ? iOSPicker() : androidPicker();
@@ -46,8 +44,11 @@ class _PriceScreenState extends State<PriceScreen> {
     List<Text> pickerChildren = currenciesList.map((e) => Text(e)).toList();
     return CupertinoPicker(
       itemExtent: 32,
-      onSelectedItemChanged: (int value) {
-        print(value);
+      onSelectedItemChanged: (int index) {
+        setState(() {
+          selectedCurrency = currenciesList[index];
+        });
+        getCoinData();
       },
       children: pickerChildren,
     );
@@ -65,6 +66,7 @@ class _PriceScreenState extends State<PriceScreen> {
         setState(() {
           selectedCurrency = value;
         });
+        getCoinData();
       },
     );
   }
@@ -90,7 +92,7 @@ class _PriceScreenState extends State<PriceScreen> {
               child: Padding(
                 padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 28.0),
                 child: Text(
-                  '1 BTC = $USD USD',
+                  '1 BTC = $bitcoinValue $selectedCurrency',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 20.0,
