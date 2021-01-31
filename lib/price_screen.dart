@@ -10,16 +10,33 @@ class PriceScreen extends StatefulWidget {
 }
 
 class _PriceScreenState extends State<PriceScreen> {
-  String selectedCurrency = 'USD';
+  String USD = '?';
 
-  List<DropdownMenuItem<String>> getDropdownItems() {
-    List<DropdownMenuItem<String>> items = currenciesList
-        .map(
-          (e) => DropdownMenuItem(child: Text(e), value: e),
-        )
-        .toList();
-    return items;
+  @override
+  void initState() {
+    getCoinData();
+    super.initState();
   }
+
+  Future<void> getCoinData() async {
+    CoinData coinData = CoinData();
+    var data = await coinData.getCoinData();
+    print(data);
+    if (data == null) {
+      updateUI('Error getting');
+    } else {
+      double rate = data['rate'];
+      updateUI(rate.toStringAsFixed(0));
+    }
+  }
+
+  void updateUI(String exchangeRate) {
+    setState(() {
+      USD = exchangeRate;
+    });
+  }
+
+  String selectedCurrency = 'USD';
 
   Widget getPlatformPicker() {
     return Platform.isIOS ? iOSPicker() : androidPicker();
@@ -73,7 +90,7 @@ class _PriceScreenState extends State<PriceScreen> {
               child: Padding(
                 padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 28.0),
                 child: Text(
-                  '1 BTC = ? USD',
+                  '1 BTC = $USD USD',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 20.0,
